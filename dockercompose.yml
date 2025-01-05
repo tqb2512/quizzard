@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  quizzard:
+    image: quizzard
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    networks:
+      - dokploy-network
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+
+networks:
+  dokploy-network:
+    external: true
