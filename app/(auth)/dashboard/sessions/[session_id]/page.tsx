@@ -296,6 +296,20 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
             });
     };
 
+    const showLeaderboard = () => {
+        const supabase = createClient();
+
+        supabase
+            .channel(`game_session:${session.id}`)
+            .send({
+                type: "broadcast",
+                event: "leaderboard",
+                payload: {
+                    is_show_leaderboard: true,
+                }
+            });
+    };
+
     if (!session) {
         return null;
     }
@@ -353,7 +367,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                             <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={() => { }}
+                                onClick={showLeaderboard}
                             >
                                 <Trophy className="w-4 h-4" />
                             </Button>

@@ -10,6 +10,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { MatchingQuestion } from './matching-question';
+import Leaderboard from './leaderboard';
 
 const activities = [
     'enter-nickname',
@@ -64,11 +65,14 @@ export default function PlayPage({ params }: { params: Promise<{ session_id: str
                     });
                 })
                 .on("broadcast", { event: "question_change" }, (payload) => {
+                    setCurrentActivity('question');
                     setCurrentQuestion(payload.payload.question);
                     console.log(payload.payload.question);
                 })
                 .on("broadcast", { event: "leaderboard" }, (payload) => {
-                    
+                    if (payload.payload.is_show_leaderboard) {
+                        setCurrentActivity('leaderboard');
+                    }
                 })
                 .subscribe();
         });
@@ -119,6 +123,14 @@ export default function PlayPage({ params }: { params: Promise<{ session_id: str
                         </CardContent>
                     </Card>
                 )}
+            </div>
+        );
+    }
+
+    if (currentActivity === 'leaderboard') {
+        return (
+            <div className="h-screen w-screen bg-blue-500 bg-pattern items-center justify-center flex">
+                <Leaderboard p_id={p_id} session_id={session.id} />
             </div>
         );
     }
