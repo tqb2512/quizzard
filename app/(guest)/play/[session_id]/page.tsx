@@ -67,6 +67,9 @@ export default function PlayPage({ params }: { params: Promise<{ session_id: str
                     setCurrentQuestion(payload.payload.question);
                     console.log(payload.payload.question);
                 })
+                .on("broadcast", { event: "leaderboard" }, (payload) => {
+                    
+                })
                 .subscribe();
         });
     }, []);

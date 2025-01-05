@@ -14,17 +14,27 @@ interface MultipleChoiceQuestionProps {
 export function MultipleChoiceQuestion({ p_id, session_id, question }: MultipleChoiceQuestionProps) {
 
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isShowAnswer, setIsShowAnswer] = useState(false);
     const [selected, setSelected] = useState<string | null>(null);
     const [timeLeft, setTimeLeft] = useState(question.time);
 
     useEffect(() => {
-        if (timeLeft > 0 && !isSubmitted) {
+        setIsSubmitted(false);
+        setIsShowAnswer(false);
+        setSelected(null);
+        setTimeLeft(question.time);
+    }, [question.id]);
+
+    useEffect(() => {
+        if (timeLeft > 0) {
             const timer = setTimeout(() => {
                 setTimeLeft((prevTime: number) => prevTime - 1);
             }, 1000);
             return () => clearTimeout(timer);
-        } else if (timeLeft === 0 && !isSubmitted) {
-            handleSubmit();
+        } else if (timeLeft === 0) {
+            if (!isSubmitted)
+                handleSubmit();
+            setIsShowAnswer(true);
         }
     }, [timeLeft, isSubmitted]);
 
@@ -64,7 +74,10 @@ export function MultipleChoiceQuestion({ p_id, session_id, question }: MultipleC
                     <Button
                         disabled={isSubmitted}
                         key={answer.id}
-                        className={`h-full w-full bg-gray-300 hover:bg-gray-400 rounded-lg flex flex-col justify-center items-center ${selected === answer.id ? 'bg-yellow-400 hover:bg-yellow-500' : ''}`}
+                        className={`h-full w-full bg-gray-300 hover:bg-gray-400 rounded-lg flex flex-col justify-center items-center
+                            ${selected === answer.id ? 'bg-yellow-400 hover:bg-yellow-500' : ''}
+                            ${isShowAnswer && answer.is_correct ? 'bg-green-400' : ''}
+                            `}
                         onClick={() => setSelected(answer.id)} >
                         <Label className="text-3xl font-medium text-black">{answer.answer_text}</Label>
                     </Button>

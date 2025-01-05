@@ -20,23 +20,35 @@ interface Match {
 
 export function MatchingQuestion({ p_id, session_id, question }: MatchingQuestionProps) {
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isShowAnswer, setIsShowAnswer] = useState(false);
     const [selected, setSelected] = useState<string | null>(null);
     const [matches, setMatches] = useState<Match[]>([]);
     const [randomizedMatching, setRandomizedMatching] = useState<any[]>([]);
     const [timeLeft, setTimeLeft] = useState(question.time);
 
     useEffect(() => {
+        setIsSubmitted(false);
+        setIsShowAnswer(false);
+        setSelected(null);
+        setMatches([]);
+        setTimeLeft(question.time);
+        setRandomizedMatching([...question.answers].sort(() => Math.random() - 0.5));
+    }, [question.id]);
+
+    useEffect(() => {
         setRandomizedMatching([...question.answers].sort(() => Math.random() - 0.5));
     }, [question.answers]);
 
     useEffect(() => {
-        if (timeLeft > 0 && !isSubmitted) {
+        if (timeLeft > 0) {
             const timer = setTimeout(() => {
                 setTimeLeft((prevTime: number) => prevTime - 1);
             }, 1000);
             return () => clearTimeout(timer);
-        } else if (timeLeft === 0 && !isSubmitted) {
-            handleSubmit();
+        } else if (timeLeft === 0) {
+            if (!isSubmitted)
+                handleSubmit();
+            setIsShowAnswer(true);
         }
     }, [timeLeft, isSubmitted]);
 
@@ -125,6 +137,12 @@ export function MatchingQuestion({ p_id, session_id, question }: MatchingQuestio
                                     <Label className="text-sm sm:text-base font-medium text-blue-600 mt-2 text-center">
                                         {getMatchedAnswer(answer.answer_specific_data.matching_text)}
                                     </Label>
+                                    {
+                                        isShowAnswer && 
+                                        <Label className="text-sm sm:text-base font-medium text-green-400 mt-1 text-center">
+                                            {answer.answer_text}
+                                        </Label>
+                                    }                                
                                     <Button
                                         disabled={isSubmitted}
                                         variant="ghost"

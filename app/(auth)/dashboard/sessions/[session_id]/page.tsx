@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Play, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { time } from "console";
+import { TimeBar } from "@/components/time-bar";
 
 interface Session {
     id: string;
@@ -82,6 +83,18 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
     const router = useRouter();
     const toast = useToast();
     const [session, setSession] = useState<any | null>(null);
+    const [timeLeft, setTimeLeft] = useState<number>(0);
+
+    useEffect(() => {
+        if (timeLeft && timeLeft > 0) {
+            const timer = setTimeout(() => {
+                setTimeLeft((prevTime: number) => prevTime - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        } else if (timeLeft === 0) {
+            
+        }
+    }, [timeLeft]);
 
     useEffect(() => {
         params.then(({ session_id }) => {
@@ -180,6 +193,14 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
         supabase
             .channel(`game_session:${session.id}`)
             .on("broadcast", { event: "submit_answer" }, async (payload) => {
+                const { data: p_data } = await createClient()
+                    .from("participants")
+                    .select("*")
+                    .eq("id", payload.payload.p_id)
+                    .single();
+
+                console.log(p_data.score + 1);
+
                 switch (payload.payload.answer_type) {
                     case "multiple_choice":
                         const questionMC = session.games.questions.find((question: any) => question.id === payload.payload.question_id);
@@ -199,7 +220,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                         await createClient()
                             .from("participants")
                             .update({
-                                score: Math.round(scoreMC),
+                                score: p_data.score + Math.round(scoreMC),
                             })
                             .eq("id", payload.payload.p_id);
 
@@ -214,7 +235,6 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                         //const is_correctM = correctMatches.length === questionM.answers.length;
                         const scoreM = payload.payload.time_left / questionM.time * correctMatches.length / questionM.answers.length * 100;
 
-                        console.log(scoreM);
 
                         await createClient()
                             .from("participant_answers")
@@ -227,7 +247,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                         await createClient()
                             .from("participants")
                             .update({
-                                score: Math.round(scoreM),
+                                score: p_data + Math.round(scoreM),
                             })
                             .eq("id", payload.payload.p_id);
 
@@ -241,6 +261,8 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
 
     const changeCurrentQuestion = (questionId: string) => {
         const supabase = createClient();
+         
+        setTimeLeft(session.games.questions.find((question: any) => question.id === questionId).time);
 
         supabase
             .from("game_sessions")
@@ -340,6 +362,13 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                     <div>
                         <h1 className="text-xl font-semibold text-primary">Current Question</h1>
                         <div className="space-y-2">
+                            <div className="font-semibold flex flex-row justify-between items-center space-x-2">
+                                <h1 className="s">Time:</h1>
+                                {
+                                    session.session_data.current_question &&
+                                    <TimeBar totalTime={session.games.questions.find((question: any) => question.id === session.session_data.current_question).time} timeLeft={timeLeft} />
+                                }
+                            </div>
                             <div>
                                 <span className="font-semibold">Question ID:</span> {session.session_data.current_question}
                             </div>
