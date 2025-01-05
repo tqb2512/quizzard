@@ -13,6 +13,7 @@ import { AddAnswerDialog } from "./add-answer-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { v4 as uuidv4 } from "uuid";
 
 export default function QuizEditorPage({ params }: { params: Promise<{ game_id: string }> }) {
     const router = useRouter();
@@ -184,6 +185,25 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
                         ))}
                     </div>
                 );
+            case "drawing":
+                return (
+                    <div className="space-y-2">
+                        {answers.map((answer) => (
+                            <div key={answer.id} className="flex items-center justify-between p-2 bg-secondary rounded-md">
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-sm">{answer.answer_text}</span>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => deleteAnswer(questionId, answer.id)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                );
             default:
                 return <div className="text-sm text-muted-foreground">Unsupported question type</div>;
         }
@@ -208,6 +228,7 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
             question_text: questionText,
             question_type: questionType,
             index: questions ? questions.length : 0,
+            time: 60,
         };
 
         const { error } = await supabase.from("questions").insert(questionData);
@@ -259,6 +280,27 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
                         <p className="text-sm text-muted-foreground mt-1">{game.description}</p>
                     </div>
                     <div className="flex space-x-2 mt-4 sm:mt-0">
+                        <Button
+                            variant="outline"
+                            onClick={async () => {
+                                const supabase = createClient();
+                                const session_id = uuidv4();
+
+                                const { data: { user } } = await supabase.auth.getUser();
+
+                                await supabase
+                                    .from("game_sessions")
+                                    .insert({
+                                        id: session_id,
+                                        game_id: game.id,
+                                        creator_id: user?.id,
+                                    });
+
+                                router.push(`/dashboard/sessions/${session_id}`);
+                            }}
+                        >
+                            Start a Session
+                        </Button>
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button>
@@ -283,6 +325,7 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
                                             <SelectContent>
                                                 <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
                                                 <SelectItem value="matching">Matching</SelectItem>
+                                                <SelectItem value="drawing">Drawing</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -309,27 +352,30 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
                                     {renderAnswers(question.answers, question.question_type, question.id)}
                                 </CardContent>
                                 <CardFooter className="flex justify-between">
-                                    <AddAnswerDialog
-                                        questionId={question.id}
-                                        questionType={question.question_type}
-                                        onAnswerAdded={() => {
-                                            createClient()
-                                                .from("questions")
-                                                .select("*, answers(*)")
-                                                .eq("game_id", game.id)
-                                                .then(({ data, error }) => {
-                                                    if (error) {
-                                                        console.error(error);
-                                                        toast.toast({
-                                                            title: "Error",
-                                                            description: "Failed to load questions",
-                                                            variant: "destructive",
+                                    {
+                                        question.question_type !== "drawing" ?
+                                            <AddAnswerDialog
+                                                questionId={question.id}
+                                                questionType={question.question_type}
+                                                onAnswerAdded={() => {
+                                                    createClient()
+                                                        .from("questions")
+                                                        .select("*, answers(*)")
+                                                        .eq("game_id", game.id)
+                                                        .then(({ data, error }) => {
+                                                            if (error) {
+                                                                console.error(error);
+                                                                toast.toast({
+                                                                    title: "Error",
+                                                                    description: "Failed to load questions",
+                                                                    variant: "destructive",
+                                                                });
+                                                            }
+                                                            setQuestions(data);
                                                         });
-                                                    }
-                                                    setQuestions(data);
-                                                });
-                                        }}
-                                    />
+                                                }}
+                                            /> : <div />
+                                    }
                                     <div className="space-x-2">
                                         <Button
                                             variant="outline"

@@ -71,22 +71,24 @@ export default function GamesPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {games.map((game) => (
-                                    <TableRow key={game.id}>
-                                        <TableCell className="font-medium">{game.title}</TableCell>
-                                        <TableCell>{game.description || "N/A"}</TableCell>
-                                        <TableCell>{new Date(game.created_at).toLocaleString()}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => router.push(`games/${game.id}`)}
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {games
+                                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                    .map((game) => (
+                                        <TableRow key={game.id}>
+                                            <TableCell className="font-medium">{game.title}</TableCell>
+                                            <TableCell>{game.description || "N/A"}</TableCell>
+                                            <TableCell>{new Date(game.created_at).toLocaleString()}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => router.push(`games/${game.id}`)}
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
                             </TableBody>
                         </Table>
                     )}

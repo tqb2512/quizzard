@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { MultipleChoiceQuestion } from './multiple-choice-question';
 import { MatchingQuestion } from './matching-question';
 import Leaderboard from './leaderboard';
+import { DrawingQuestion } from './drawing';
 
 const activities = [
     'enter-nickname',
@@ -88,6 +89,8 @@ export default function PlayPage({ params }: { params: Promise<{ session_id: str
                 return <MultipleChoiceQuestion p_id={p_id} session_id={session.id} question={question} />;
             case 'matching':
                 return <MatchingQuestion p_id={p_id} session_id={session.id} question={question} />;
+            case 'drawing':
+                return <DrawingQuestion p_id={p_id} session_id={session.id} question={question} />;
             default:
                 return <div>Unknown question type</div>;
         }

@@ -92,7 +92,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
             }, 1000);
             return () => clearTimeout(timer);
         } else if (timeLeft === 0) {
-            
+
         }
     }, [timeLeft]);
 
@@ -252,6 +252,15 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                             .eq("id", payload.payload.p_id);
 
                         break;
+                    case "drawing":
+                        await createClient()
+                            .from("participant_answers")
+                            .insert({
+                                question_id: payload.payload.question_id,
+                                participant_id: payload.payload.p_id,
+                                answer_content: payload.payload.answer_data,
+                            })
+                        break;
                     default:
                         break;
                 }
@@ -261,7 +270,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
 
     const changeCurrentQuestion = (questionId: string) => {
         const supabase = createClient();
-         
+
         setTimeLeft(session.games.questions.find((question: any) => question.id === questionId).time);
 
         supabase

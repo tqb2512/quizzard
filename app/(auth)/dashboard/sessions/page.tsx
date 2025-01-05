@@ -58,22 +58,24 @@ export default function SessionsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {sessions.map((session) => (
-                                    <TableRow key={session.id}>
-                                        <TableCell>{session.games.title}</TableCell>
-                                        <TableCell>{session.status}</TableCell>
-                                        <TableCell>{new Date(session.created_at).toLocaleString()}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => router.push(`sessions/${session.id}`)}
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {sessions
+                                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                    .map((session) => (
+                                        <TableRow key={session.id}>
+                                            <TableCell>{session.games.title}</TableCell>
+                                            <TableCell>{session.status}</TableCell>
+                                            <TableCell>{new Date(session.created_at).toLocaleString()}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => router.push(`sessions/${session.id}`)}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
                             </TableBody>
                         </Table>
                     )}

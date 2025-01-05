@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { createClient } from "@/utils/supabase/client";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import DrawingResult from "./DrawingResult";
 
 interface Session {
     id: string;
@@ -141,6 +142,14 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                         })}
                     </div>
                 );
+            case "drawing":
+                return (
+                    <div className="h-[400px] w-full rounded-md border">
+                        <DrawingResult
+                            answerContent={selectedParticipant?.participant_answers.find((pa: any) => pa.question_id === questionId)?.answer_content}
+                        />
+                    </div>
+                )
             default:
                 return <div className="text-sm text-muted-foreground">Unsupported question type</div>;
         }
