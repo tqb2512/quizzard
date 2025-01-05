@@ -14,7 +14,7 @@ const DrawingResult = ({ answerContent }: { answerContent: { paths: Path[] } }) 
     const resizeCanvas = () => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
-        
+
         if (canvas && container) {
             const containerWidth = container.clientWidth;
             const containerHeight = container.clientHeight;

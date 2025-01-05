@@ -138,11 +138,11 @@ export function MatchingQuestion({ p_id, session_id, question }: MatchingQuestio
                                         {getMatchedAnswer(answer.answer_specific_data.matching_text)}
                                     </Label>
                                     {
-                                        isShowAnswer && 
+                                        isShowAnswer &&
                                         <Label className="text-sm sm:text-base font-medium text-green-400 mt-1 text-center">
                                             {answer.answer_text}
                                         </Label>
-                                    }                                
+                                    }
                                     <Button
                                         disabled={isSubmitted}
                                         variant="ghost"

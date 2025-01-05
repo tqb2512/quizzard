@@ -8,7 +8,7 @@ export default function DashboardPage() {
     const router = useRouter();
 
     useEffect(() => {
-        
+
     }, []);
 
     return (
@@ -18,7 +18,7 @@ export default function DashboardPage() {
                     <CardTitle className="text-xl sm:text-2xl font-bold text-primary"></CardTitle>
                 </CardHeader>
                 <CardContent>
-                    
+
                 </CardContent>
             </Card>
         </div>

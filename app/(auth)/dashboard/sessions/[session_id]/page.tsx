@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Play, Trophy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Ban, Play, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { time } from "console";
 import { TimeBar } from "@/components/time-bar";
@@ -109,8 +109,10 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                     if (error) {
                         console.error(error);
                     } else {
-                        setSession(data);
-                        console.log(data);
+                        if (data.status === "ended")
+                            router.push(`/dashboard/sessions/${data.id}/result`);
+                        else
+                            setSession(data);
                     }
                 });
 
@@ -167,6 +169,10 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                         ))}
                     </div>
                 );
+            case "drawing":
+                return (
+                    <div />
+                )
             default:
                 return <div className="text-sm text-muted-foreground">Unsupported question type</div>;
         }
@@ -337,6 +343,9 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                             <span className="font-semibold">Session ID:</span> {session.id}
                         </div>
                         <div>
+                            <span className="font-semibold">Short session ID:</span> {session.short_id}
+                        </div>
+                        <div>
                             <span className="font-semibold">Status:</span> {session.status}
                         </div>
                         <div>
@@ -352,6 +361,15 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                                 disabled={session.status === "started"}
                             >
                                 <Play className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={async () => {
+                                    await createClient().from("game_sessions").update({ status: "ended" }).eq("id", session.id);
+                                }}
+                            >
+                                <Ban className="w-4 h-4" />
                             </Button>
                             <Button
                                 variant="outline"
@@ -386,14 +404,19 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                         <h1 className="text-xl font-semibold text-primary">Current Question</h1>
                         <div className="space-y-2">
                             <div className="font-semibold flex flex-row justify-between items-center space-x-2">
-                                <h1 className="s">Time:</h1>
+                                <h1 className="">Time:</h1>
                                 {
                                     session.session_data.current_question &&
                                     <TimeBar totalTime={session.games.questions.find((question: any) => question.id === session.session_data.current_question).time} timeLeft={timeLeft} />
                                 }
                             </div>
-                            <div>
+
+                            <div className="space-x-2">
                                 <span className="font-semibold">Question ID:</span> {session.session_data.current_question}
+                            </div>
+
+                            <div className="space-x-2">
+                                <span className="font-semibold">Question:</span> {session.session_data.current_question && session.games.questions.find((question: any) => question.id === session.session_data.current_question).question_text}
                             </div>
                         </div>
                     </div>

@@ -7,6 +7,10 @@ import { createClient } from "@/utils/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { v4 as uuidv4 } from "uuid";
 
 interface Game {
     id: string;
@@ -25,6 +29,7 @@ export default function GamesPage() {
     const router = useRouter();
     const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState(true);
+    const [title, setTitle] = useState("");
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -49,11 +54,57 @@ export default function GamesPage() {
         fetchGames();
     }, []);
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const supabase = createClient();
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return;
+
+        const gameData = {
+            id: uuidv4(),
+            title,
+            description: "",
+            creator_id: user.id,
+        };
+
+        const { error } = await supabase.from("games").insert(gameData);
+
+        router.push(`games/${gameData.id}`);
+    };
+
     return (
         <div className="p-4 overflow-y-auto sm:p-6 space-y-6 lg:space-y-0 lg:flex lg:gap-6">
             <Card className="w-full">
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 flex flex-row justify-between">
                     <CardTitle className="text-xl sm:text-2xl font-bold text-primary">Games</CardTitle>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button>
+                                Create Game
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Create new game</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title">Game Title</Label>
+                                    <Input
+                                        id="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="flex justify-end">
+                                    <Button type="submit">Submit</Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </CardHeader>
                 <CardContent>
                     {loading ? (

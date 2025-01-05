@@ -33,9 +33,9 @@ export function EnterNickname({ p_id, session, nickname, setNickname, setCurrent
                                 setCurrentActivity('waiting-game-start')
                             );
                     }}>
-                START
-            </Button>
-        </CardContent>
+                    START
+                </Button>
+            </CardContent>
         </Card >
     )
 }

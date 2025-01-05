@@ -121,7 +121,7 @@ export default function PlayPage({ params }: { params: Promise<{ session_id: str
                             {session.participants.map((participant: any) => (
                                 <Badge key={participant.id} className={`text-center ${participant.id === p_id ? 'bg-yellow-400 text-black' : ''}`}>
                                     {participant.nickname}
-                                </Badge>    
+                                </Badge>
                             ))}
                         </CardContent>
                     </Card>
