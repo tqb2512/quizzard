@@ -136,7 +136,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                 })
                 .subscribe();
         });
-    }, []);
+    }, [params]);
 
     const renderAnswers = (answers: any[], question_type: string, questionId: string) => {
         switch (question_type) {
@@ -272,6 +272,13 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                 }
             })
             .subscribe();
+
+            setSession((prev: any) => {
+                return {
+                    ...prev,
+                    status: "started",
+                };
+            });
     };
 
     const changeCurrentQuestion = (questionId: string) => {
@@ -309,6 +316,17 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                     question: session.games.questions.find((question: any) => question.id === questionId),
                 }
             });
+
+        setSession((prev: any) => {
+            return {
+                ...prev,
+                session_data: {
+                    current_question: questionId,
+                    current_question_index: session.games.questions.find((question: any) => question.id === questionId).index,
+                    completed_questions: [...session.session_data.completed_questions || [], questionId],
+                }
+            };
+        });
     };
 
     const showLeaderboard = () => {
@@ -367,6 +385,7 @@ export default function SessionDetailPage({ params }: { params: Promise<{ sessio
                                 size="icon"
                                 onClick={async () => {
                                     await createClient().from("game_sessions").update({ status: "ended" }).eq("id", session.id);
+                                    router.push(`/dashboard/sessions/${session.id}/result`);
                                 }}
                             >
                                 <Ban className="w-4 h-4" />

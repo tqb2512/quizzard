@@ -28,6 +28,10 @@ export function EnterNickname({ p_id, session, nickname, setNickname, setCurrent
                 <Button
                     className="w-full bg-yellow-400 hover:bg-yellow-500 text-black"
                     onClick={() => {
+                        if (!nickname) {
+                            alert("Please enter a nickname");
+                            return;
+                        }
                         createClient().from('participants').upsert({ id: p_id, nickname, game_session_id: session.id })
                             .then(() =>
                                 setCurrentActivity('waiting-game-start')

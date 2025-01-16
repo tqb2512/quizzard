@@ -13,10 +13,11 @@ import { Plus } from 'lucide-react';
 interface AddAnswerDialogProps {
     questionId: string;
     questionType: string;
+    question: any;
     onAnswerAdded: () => void;
 }
 
-export function AddAnswerDialog({ questionId, questionType, onAnswerAdded }: AddAnswerDialogProps) {
+export function AddAnswerDialog({ questionId, questionType, question, onAnswerAdded }: AddAnswerDialogProps) {
     const toast = useToast();
     const [answerText, setAnswerText] = useState("");
     const [matchingText, setMatchingText] = useState("");
@@ -26,6 +27,19 @@ export function AddAnswerDialog({ questionId, questionType, onAnswerAdded }: Add
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const supabase = createClient();
+
+        if (questionType === "multiple_choice" && isCorrect === true) {
+            for (const answer of question.answers) {
+                if (answer.is_correct === true) {
+                    toast.toast({
+                        title: "Error",
+                        description: "Only one correct answer is allowed",
+                        variant: "destructive",
+                    });
+                    return;
+                }
+            }
+        }
 
         const answerData = {
             question_id: questionId,

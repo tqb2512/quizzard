@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { v4 as uuidv4 } from "uuid";
+import { QuestionSettingsDialog } from "./question-settings-diaglog";
 
 export default function QuizEditorPage({ params }: { params: Promise<{ game_id: string }> }) {
     const router = useRouter();
@@ -357,6 +358,7 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
                                             <AddAnswerDialog
                                                 questionId={question.id}
                                                 questionType={question.question_type}
+                                                question={question}
                                                 onAnswerAdded={() => {
                                                     createClient()
                                                         .from("questions")
@@ -377,6 +379,28 @@ export default function QuizEditorPage({ params }: { params: Promise<{ game_id: 
                                             /> : <div />
                                     }
                                     <div className="space-x-2">
+                                        <QuestionSettingsDialog
+                                            questionId={question.id}
+                                            questionType={question.question_type}
+                                            question={question}
+                                            onQuestionSettingsChanged={() => {
+                                                createClient()
+                                                    .from("questions")
+                                                    .select("*, answers(*)")
+                                                    .eq("game_id", game.id)
+                                                    .then(({ data, error }) => {
+                                                        if (error) {
+                                                            console.error(error);
+                                                            toast.toast({
+                                                                title: "Error",
+                                                                description: "Failed to load questions",
+                                                                variant: "destructive",
+                                                            });
+                                                        }
+                                                        setQuestions(data);
+                                                    });
+                                            }}
+                                        />
                                         <Button
                                             variant="outline"
                                             size="icon"

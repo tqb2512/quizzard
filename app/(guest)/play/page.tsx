@@ -35,7 +35,11 @@ export default function PlayPage() {
                                     if (!data) {
                                         alert('Room not found');
                                     } else {
-                                        router.push(`play/${data.id}`);
+                                        if (data.status === 'pending') {
+                                            router.push(`/play/${data.id}`);
+                                        } else {
+                                            alert('Game has already started');
+                                        }
                                     }
                                 });
                         }}>
